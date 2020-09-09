@@ -22,6 +22,83 @@ class Deck:
                         image_path ="CardImages/"+color+" "+fill+" "+shape+number+".gif"
                         self.cardList.append(Card(color, fill, shape, number,image_path))
         self.display = [(count,elem) for count,elem in enumerate(self.cardList[0:init_num])] #tuple value
+        self.hasSetInDisplay = False
+        self.hasSetInCardList = False
+        self.hint = []
+    def displayCheck(self):
+        self.hasSetInDisplay = False
+        for (count1,card_1) in self.display[:-2]:
+            for (count2,card_2) in self.display[count1+1:-1]:
+                for (count3,card_3) in self.display[count2+1::]:
+                    card1 = card_1.getAll()
+                    card2 = card_2.getAll()
+                    card3 = card_3.getAll()
+                    checklist = [1,1,1,1] #init with 'na' == 1
+                    #same for all same = 2, diff for all different == 0, na for not valid
+                    if (card1  == ("","","","")):
+                        continue
+                    if(card2  == ("","","","")):
+                        continue
+                    if(card3  == ("","","","")):
+                        continue
+                    for i in range(4):
+                        #totally for attribute
+                        
+                        attribute_list = [card1[i],card2[i],card3[i]]
+                        num = len(np.unique(attribute_list))
+                        if num == 3:
+                            #all different == 0
+                            checklist[i] = 0
+                        elif num == 1:
+                            #all same == 2
+                            checklist[i] = 2
+                    
+                    if 1 not in checklist:#if 'na' not in checklist
+                        #only same == 2 and diff == 0
+                        self.hasSetInDisplay = True
+                    if (self.hasSetInDisplay ==True):
+                        self.hint=[count1,count2,count3]
+                        print(card1,card2,card3)
+                        print(self.hint)
+                        return self.hasSetInDisplay
+    
+    def cardListCheck(self):
+        self.hasSetInCardList = False
+        cardlist = [(count,elem) for count,elem in enumerate(self.cardList)]
+
+        for (count1,card_1) in cardlist[:-2]:
+            for (count2,card_2) in cardlist[count1+1:-1]:
+                for (count3,card_3) in cardlist[count2+1::]:
+                    card1 = card_1.getAll()
+                    card2 = card_2.getAll()
+                    card3 = card_3.getAll()
+                    checklist = [1,1,1,1] #init with 'na' == 1
+                    #same for all same = 2, diff for all different == 0, na for not valid
+                    if (card1  == ("","","","")):
+                        continue
+                    if(card2  == ("","","","")):
+                        continue
+                    if(card3  == ("","","","")):
+                        continue
+                    for i in range(4):
+                        #totally for attribute
+                        
+                        attribute_list = [card1[i],card2[i],card3[i]]
+                        num = len(np.unique(attribute_list))
+                        if num == 3:
+                            #all different == 0
+                            checklist[i] = 0
+                        elif num == 1:
+                            #all same == 2
+                            checklist[i] = 2
+                    
+                    if 1 not in checklist:#if 'na' not in checklist
+                        #only same == 2 and diff == 0
+                        self.hasSetInCardList = True
+                    if (self.hasSetInCardList ==True):
+                        return self.hasSetInCardList
+                    
+                    
     def getNumberOfCards(self):
         return len(self.cardList)
     def getDisplayList(self):
