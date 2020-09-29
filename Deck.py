@@ -1,6 +1,18 @@
 import numpy as np
 import Card
+import os
+import sys
 Card = Card.Card
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 class Deck:
     
@@ -10,16 +22,19 @@ class Deck:
         self.fillList = ['solid', 'shaded', 'clear']
         self.shapeList = ['circle', 'triangle','square']
         self.numList = ['1','2','3']
+        self.hint_num = 3
         self.record = [] #passed formed set | element type: List of Card
         self.waitingList = [] #sets waiting for checking | element type: tuple value
         self.init_num = init_num
+        self.score =0
          #cards that are displayed
         for color in self.colorList:
             for fill in self.fillList:
                 for shape in self.shapeList:
                     for number in self.numList:
                         #path yellow shaded triangle2 example
-                        image_path ="CardImages/"+color+" "+fill+" "+shape+number+".gif"
+                        image_path =resource_path(color+" "+fill+" "+shape+number+".gif")
+                        #image_path = "CardImages/"+color+" "+fill+" "+shape+number+".gif"
                         self.cardList.append(Card(color, fill, shape, number,image_path))
         self.display = [(count,elem) for count,elem in enumerate(self.cardList[0:init_num])] #tuple value
         self.hasSetInDisplay = False
@@ -168,8 +183,10 @@ class Deck:
             result = True
         #clean up
         if result ==True:
+            self.score+=20
             self.moveToRecord()
         else:
+            self.score -=5
             self.emptyWaitingList()
 
         #todo: error message hint

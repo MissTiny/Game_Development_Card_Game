@@ -7,7 +7,6 @@ class Card:
         self.fill = Fill
         self.shape = Shape
         self.number = Number
-
         self.image = PhotoImage(file=Image_Path)
        # self.is_selected = False
 

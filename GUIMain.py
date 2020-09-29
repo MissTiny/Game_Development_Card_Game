@@ -69,11 +69,11 @@ def cardSelect(btn,card,deck,top_frame,side_frame,bottom_frame,main_frame):
         selected_button = []
         #label.place(relx=0.5,rely=0.1)
         message.place(relx=0.5,rely=0.5,anchor = CENTER)
-        top_frame.after(800, lambda arg1= message,arg2=top_frame:flashMessage(arg1,arg2)) 
+        top_frame.after(1000, lambda arg1= message,arg2=top_frame:flashMessage(arg1,arg2)) 
 
         
         #update_sidebar
-        score_content = Label(side_frame,text=str(len(deck.getRecord())),bg = side_frame['bg'],font=("Courier", 20))
+        score_content = Label(side_frame,text=str(deck.score),bg = side_frame['bg'],font=("Courier", 20))
         score_content.place(relx = 0.5, rely = 0.15, anchor=CENTER)
         
         deck_content = "Remain in the deck:" + str(deck.getNumberOfCards())
@@ -83,7 +83,7 @@ def cardSelect(btn,card,deck,top_frame,side_frame,bottom_frame,main_frame):
         selffresh(deck,bottom_frame,main_frame,side_frame,top_frame)
         if (deck.getNumberOfCards() == 0):
             btns=[main_frame,top_frame,side_frame,bottom_frame]
-            init("end",len(deck.getRecord()),btns)
+            init("end",deck.score,btns)
             
 def flashMessage(message, frame):
     message.destroy()
@@ -101,16 +101,31 @@ def display(cards_display_list,deck,main_frame,top_frame,side_frame,bottom_frame
         btn.grid(row= row, column = col)
         btn.image = photo
     '''
-    hint_button =Button(side_frame,text="Hint",relief = RAISED,font=("Courier", 10))
-    hint_button.config(command =lambda arg1=deck.getDisplayList(),arg2=deck,arg3=main_frame,arg4=top_frame,arg5=side_frame,arg6=bottom_frame,arg7=True:display(arg1,arg2,arg3,arg4,arg5,arg6,arg7))
-    hint_button.place(relx=0.5, rely=0.05,anchor = CENTER)
     if(is_hint):
+        deck.hint_num  = deck.hint_num - 1
+    if (deck.hint_num > 0 ):
+        
+        hint_button =Button(side_frame,text="Hint",relief = RAISED,font=("Courier", 10))
+        hint_button.config(command =lambda arg1=deck.getDisplayList(),arg2=deck,arg3=main_frame,arg4=top_frame,arg5=side_frame,arg6=bottom_frame,arg7=True:display(arg1,arg2,arg3,arg4,arg5,arg6,arg7))
+        hint_button.place(relx=0.1, rely=0.05,anchor = CENTER)
+    else:
+        hint_button =Button(side_frame,text="Hint",relief = RAISED,font=("Courier", 10))
+        hint_button.config(command =lambda arg1=deck.getDisplayList(),arg2=deck,arg3=main_frame,arg4=top_frame,arg5=side_frame,arg6=bottom_frame,arg7=True:display(arg1,arg2,arg3,arg4,arg5,arg6,arg7))
+        hint_button["state"] = DISABLED
+        hint_button.place(relx=0.1, rely=0.05,anchor = CENTER)
+        
+   
+    if(is_hint & deck.hint_num >= 0):
         global selected_button
         for button in selected_button:
             button['relief'] = RAISED
             button['bg']="white"
         deck.waitingList = []
         selected_button = []
+    message = Label(side_frame,font=("Courier", 15))
+    message['text']="Remain number of hint:" + str(deck.hint_num)
+    message['bg']=side_frame['bg']
+    message.place(relx=0.55,rely=0.05,anchor = CENTER)
     for widget in main_frame.winfo_children():
         widget.destroy()
     for (i,card) in cards_display_list:
@@ -119,16 +134,20 @@ def display(cards_display_list,deck,main_frame,top_frame,side_frame,bottom_frame
             btn =Button(main_frame,image=photo,bg="white",relief = RAISED,state=tk.DISABLED)   
         else:
             #btn = Button(main_frame,image = photo,bg="white",command =card.changeIsSelected,activebackground="grey" )
-            if ((i in deck.hint) & (is_hint)):
-                btn =Button(main_frame,image = photo,bg="#fed8b1",relief = RAISED)
+            if ((i in deck.hint) & (is_hint) & (deck.hint_num >= 0)):
+                description = card.getAll()
+                btn =Button(main_frame,text=description,image = photo,compound=TOP,bg="#fed8b1",relief = RAISED)
                 selected_button.append(btn)
             else:
-                btn =Button(main_frame,image = photo,bg="white",relief = RAISED)   
+                description = card.getAll()
+                btn =Button(main_frame,text=description,image = photo,compound = TOP,bg="white",relief = RAISED)
+
             btn.config(command =lambda arg1=btn,arg2=(i,card),arg3=deck,arg4=top_frame,arg5=side_frame,arg6=bottom_frame,arg7=main_frame:cardSelect(arg1,arg2,arg3,arg4,arg5,arg6,arg7))
         col = i %4
         row = i//4
         btn.grid(row= row, column = col)
         btn.image = photo
+        btn.text = description
         global button_list
         button_list.append(btn)
 
@@ -171,12 +190,12 @@ def selffresh(deck,bottom_frame,main_frame,side_frame,top_frame):
         message.place(relx=0.5,rely=0.5,anchor = CENTER)
         deck.shuffle()
         deck.displayCheck()
-        top_frame.after(800, lambda arg1= message,arg2=top_frame:flashMessage(arg1,arg2))
+        top_frame.after(1000, lambda arg1= message,arg2=top_frame:flashMessage(arg1,arg2))
         print("new display")
         display(deck.getDisplayList(),deck,main_frame,top_frame,side_frame,bottom_frame,False)
     if (deck.hasSetInCardList == False):
         btns = [bottom_frame,main_frame,side_frame,top_frame]
-        init("noSet",len(deck.getRecord()),btns) 
+        init("noSet",deck.score,btns) 
     return deck
         
 def game():
@@ -205,10 +224,10 @@ def game():
     #side bar design
     hint_button =Button(side_frame,text="Hint",relief = RAISED,font=("Courier", 10))
     hint_button.config(command =lambda arg1=deck.getDisplayList(),arg2=deck,arg3=main_frame,arg4=top_frame,arg5=side_frame,arg6=bottom_frame,arg7=True:display(arg1,arg2,arg3,arg4,arg5,arg6,arg7))
-    hint_button.place(relx=0.5, rely=0.05,anchor = CENTER)
+    hint_button.place(relx=0.1, rely=0.05,anchor = CENTER)
     score_title = Label(side_frame,text="Your Score", bg = side_frame['bg'],font=("Courier", 20))
     score_title.place(relx = 0.5, rely = 0.1, anchor=CENTER)
-    score_content = Label(side_frame,text=str(len(deck.getRecord())),bg = side_frame['bg'],font=("Courier", 20))
+    score_content = Label(side_frame,text=str(deck.score),bg = side_frame['bg'],font=("Courier", 20))
     score_content.place(relx = 0.5, rely = 0.15, anchor=CENTER)
     record_title= Label(side_frame,text="Set Recorded", bg = side_frame['bg'],font=("Courier", 20))
     record_title.place(relx=0.5,rely=0.2,anchor=CENTER)
@@ -245,9 +264,9 @@ def game():
     home_button =Button(bottom_frame,text="Home",relief = RAISED,font=("Courier", 10))
     home_button.config(command =lambda arg1=btns:init("start",'',arg1))
     home_button.place(relx=0.25, rely=0.5,anchor = CENTER)
-    quit_button =Button(bottom_frame,text="Quit",relief = RAISED,font=("Courier", 10))
+    quit_button =Button(bottom_frame,text="Give Up!",relief = RAISED,font=("Courier", 10))
     #button feature
-    quit_button.config(command =lambda arg1=btns:init("end",len(deck.getRecord()),arg1))
+    quit_button.config(command =lambda arg1=btns:init("end",deck.score,arg1))
     quit_button.place(relx=0.75, rely=0.5,anchor = CENTER)
 
 def gameStart(btns):
@@ -303,7 +322,7 @@ message.place(relx=0.5,rely=0.5,anchor = CENTER)
 #number_init = 12
 #cards_display_index = range(number_init)
 
-init("start",20,[])
+init("start",0,[])
 
 #window display
 
